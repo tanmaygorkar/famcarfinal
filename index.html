@@ -1,0 +1,2358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FamilyCar | India's Trusted Family-to-Family Used Car Marketplace</title>
+    <meta name="description" content="Buy directly from verified owners without worrying about fake listings, duplicate ads, or dealer spam.">
+    <!-- Google Fonts: Inter for premium Apple/Tesla-like typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons for modern, clean iconography -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Global Header -->
+    <header class="global-header">
+        <div class="header-container">
+            <div class="logo" onclick="navigateTo('home-screen')" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <img id="header-logo" src="./logo.png" alt="FamilyCar" style="height: 48px; object-fit: contain;">
+            </div>
+            <div class="auth-buttons" style="display: flex; align-items: center; gap: 1rem;">
+                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle dark mode" style="background: transparent; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; transition: all 0.2s;">
+                    <i class="ph ph-moon"></i>
+                </button>
+                <!-- Logged out state: Log in button -->
+                <button id="header-login-btn" class="btn-header-login hidden" onclick="navigateTo('login-screen')">Log in</button>
+                <!-- Logged in state (hidden by default) -->
+                <div class="user-menu hidden">
+                    <button id="profile-completion-badge" class="profile-completion-btn" onclick="openProfileCompletionModal()">
+                        Profile: <span id="profile-percentage-text">40%</span> Complete
+                    </button>
+                    <button class="btn-icon" onclick="navigateTo('messages-screen')">
+                        <i class="ph ph-chat-circle"></i>
+                        <span class="badge">2</span>
+                    </button>
+                    <button class="btn-text" onclick="navigateTo('listings-screen')">My Listings</button>
+                    <div class="avatar" onclick="navigateTo('profile-screen')">
+                        <img src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" alt="Profile">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="app-content">
+
+        <!-- SCREEN 1: Landing Page -->
+        <section id="home-screen" class="screen active">
+            <div class="home-listings-header">
+                <div class="header-listings-nav-container" style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; width: 100%; margin: 0 auto; padding: 0 1.5rem; box-sizing: border-box;">
+                    <div class="listings-toggle-container">
+                        <button class="toggle-tab active" onclick="switchCategory('cars')">
+                            <i class="ph ph-car"></i> Cars
+                        </button>
+                        <button class="toggle-tab" onclick="switchCategory('bikes')">
+                            <i class="ph ph-motorcycle"></i> Bikes
+                        </button>
+                    </div>
+
+                    <!-- Car Type quick pills (visible only for cars) -->
+                    <div id="car-type-pills" class="car-type-pills-row">
+                        <button class="car-type-pill active" onclick="filterByCarType('all')" id="type-pill-all">All Types</button>
+                        <button class="car-type-pill" onclick="filterByCarType('Hatchback')" id="type-pill-hatchback"><i class="ph ph-car-simple"></i> Hatchback</button>
+                        <button class="car-type-pill" onclick="filterByCarType('Sedan')" id="type-pill-sedan"><i class="ph ph-car"></i> Sedan</button>
+                        <button class="car-type-pill" onclick="filterByCarType('SUV')" id="type-pill-suv"><i class="ph ph-truck"></i> SUV</button>
+                    </div>
+
+                    <!-- Bike Type quick pills (visible only for bikes) -->
+                    <div id="bike-type-pills" class="car-type-pills-row" style="display:none;">
+                        <button class="car-type-pill active" onclick="filterByBikeType('all')" id="bike-pill-all">All Types</button>
+                        <button class="car-type-pill" onclick="filterByBikeType('Bike')" id="bike-pill-bike"><i class="ph ph-motorcycle"></i> Bike</button>
+                        <button class="car-type-pill" onclick="filterByBikeType('Scooter')" id="bike-pill-scooter"><i class="ph ph-scooter"></i> Scooter</button>
+                    </div>
+
+                    <!-- Location Picker Dropdown -->
+                    <div class="location-picker-container" id="location-picker-container" style="position: relative;">
+                        <button class="location-picker-btn" id="location-picker-btn" onclick="toggleLocationDropdown()">
+                            <i class="ph ph-map-pin" id="location-icon"></i>
+                            <span id="location-display-text">Detecting...</span>
+                            <i class="ph ph-caret-down" style="font-size: 0.7rem; opacity: 0.6;"></i>
+                        </button>
+
+                        <!-- Location Dropdown Panel -->
+                        <div class="location-dropdown-panel" id="location-dropdown-panel" style="display:none;">
+                            <div class="location-panel-header">
+                                <span><i class="ph ph-map-pin"></i> Choose Location</span>
+                                <button class="location-panel-close" onclick="closeLocationDropdown()"><i class="ph ph-x"></i></button>
+                            </div>
+
+                            <!-- Auto detect row -->
+                            <div class="location-detect-row" id="location-detect-row">
+                                <div class="location-detect-info">
+                                    <i class="ph ph-crosshair"></i>
+                                    <div>
+                                        <strong id="detected-city-label">Detecting your location...</strong>
+                                        <small id="detected-city-sub">Using GPS</small>
+                                    </div>
+                                </div>
+                                <button class="location-use-btn" id="location-use-btn" onclick="useDetectedLocation()" disabled>Use</button>
+                            </div>
+                            <div class="location-divider"><span>or choose a city</span></div>
+
+                            <!-- City Grid -->
+                            <div class="location-city-grid">
+                                <button class="location-city-chip" onclick="selectCity('Mumbai')"><i class="ph ph-buildings"></i> Mumbai</button>
+                                <button class="location-city-chip" onclick="selectCity('Delhi NCR')"><i class="ph ph-buildings"></i> Delhi NCR</button>
+                                <button class="location-city-chip" onclick="selectCity('Bangalore')"><i class="ph ph-buildings"></i> Bangalore</button>
+                                <button class="location-city-chip" onclick="selectCity('Pune')"><i class="ph ph-buildings"></i> Pune</button>
+                                <button class="location-city-chip" onclick="selectCity('Hyderabad')"><i class="ph ph-buildings"></i> Hyderabad</button>
+                                <button class="location-city-chip" onclick="selectCity('Chennai')"><i class="ph ph-buildings"></i> Chennai</button>
+                                <button class="location-city-chip" onclick="selectCity('Kolkata')"><i class="ph ph-buildings"></i> Kolkata</button>
+                                <button class="location-city-chip" onclick="selectCity('Ahmedabad')"><i class="ph ph-buildings"></i> Ahmedabad</button>
+                                <button class="location-city-chip" onclick="selectCity('Jaipur')"><i class="ph ph-buildings"></i> Jaipur</button>
+                                <button class="location-city-chip" onclick="selectCity('Surat')"><i class="ph ph-buildings"></i> Surat</button>
+                                <button class="location-city-chip" onclick="selectCity('Lucknow')"><i class="ph ph-buildings"></i> Lucknow</button>
+                                <button class="location-city-chip" onclick="selectCity('Chandigarh')"><i class="ph ph-buildings"></i> Chandigarh</button>
+                            </div>
+
+                            <!-- Custom City Input -->
+                            <div class="location-custom-row">
+                                <input type="text" id="custom-location-input" placeholder="Type any other city..." class="location-custom-input">
+                                <button class="location-custom-confirm" onclick="confirmCustomLocation()"><i class="ph ph-check"></i></button>
+                            </div>
+
+                            <!-- All India option -->
+                            <button class="location-all-india-btn" onclick="selectCity('All India')">
+                                <i class="ph ph-globe-hemisphere-west"></i> Show All India listings
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right side filter option -->
+                    <div class="filter-dropdown-container" style="position: relative;">
+                        <button id="filter-trigger-btn" class="btn-filter" onclick="toggleFilterDropdown()" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.5rem; border-radius: 9999px; border: 1px solid #cbd5e1; background: #ffffff; font-weight: 700; color: #475569; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; height: 42px; box-sizing: border-box; outline: none;">
+                            <i class="ph ph-sliders"></i> Filter <i class="ph ph-caret-down"></i>
+                        </button>
+                        <div id="filter-dropdown" class="filter-dropdown-menu" style="display: none; position: absolute; right: 0; top: 110%; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 1.5rem; z-index: 100; width: 340px; flex-direction: column; gap: 1rem; box-sizing: border-box;">
+                            <h4 id="filter-dropdown-heading" style="margin: 0; font-size: 0.95rem; color: #1e293b; font-weight: 700; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;">Filter Cars</h4>
+
+                            <!-- ===== CAR FILTER FIELDS ===== -->
+                            <div id="car-filter-fields" style="display: flex; flex-direction: column; gap: 1rem;">
+                            <!-- Brand / Company Filter -->
+                            <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Brand (Company)</label>
+                                <select id="filter-company" onchange="applyFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                    <option value="all">All Brands</option>
+                                    <option value="Maruti Suzuki">Maruti Suzuki</option>
+                                    <option value="Hyundai">Hyundai</option>
+                                    <option value="Mahindra">Mahindra</option>
+                                    <option value="Kia">Kia</option>
+                                    <option value="Honda">Honda</option>
+                                    <option value="Toyota">Toyota</option>
+                                    <option value="Tata">Tata</option>
+                                    <option value="Volkswagen">Volkswagen</option>
+                                </select>
+                            </div>
+
+                            <!-- Price / Budget Filter -->
+                            <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Budget (Max Price)</label>
+                                <select id="filter-price" onchange="applyFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                    <option value="all">Any Price</option>
+                                    <option value="3">Up to 3 Lakh</option>
+                                    <option value="6">Up to 6 Lakh</option>
+                                    <option value="10">Up to 10 Lakh</option>
+                                    <option value="15">Up to 15 Lakh</option>
+                                    <option value="25">Up to 25 Lakh</option>
+                                    <option value="40">Up to 40 Lakh</option>
+                                </select>
+                            </div>
+
+                            <!-- Year Range Filter -->
+                            <div style="display: flex; gap: 0.75rem; justify-content: space-between;">
+                                <div style="display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">From Year</label>
+                                    <select id="filter-min-year" onchange="applyFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                        <option value="all">Min Year</option>
+                                        <option value="2015">2015</option>
+                                        <option value="2016">2016</option>
+                                        <option value="2017">2017</option>
+                                        <option value="2018">2018</option>
+                                        <option value="2019">2019</option>
+                                        <option value="2020">2020</option>
+                                        <option value="2021">2021</option>
+                                        <option value="2022">2022</option>
+                                        <option value="2023">2023</option>
+                                    </select>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">To Year</label>
+                                    <select id="filter-max-year" onchange="applyFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                        <option value="all">Max Year</option>
+                                        <option value="2015">2015</option>
+                                        <option value="2016">2016</option>
+                                        <option value="2017">2017</option>
+                                        <option value="2018">2018</option>
+                                        <option value="2019">2019</option>
+                                        <option value="2020">2020</option>
+                                        <option value="2021">2021</option>
+                                        <option value="2022">2022</option>
+                                        <option value="2023">2023</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Owner Filter -->
+                            <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">No. of Owners</label>
+                                <select id="filter-owner" onchange="applyFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                    <option value="all">Any Owner</option>
+                                    <option value="1">1st Owner Only</option>
+                                    <option value="2">2nd Owner Only</option>
+                                </select>
+                            </div>
+
+                            <!-- Fuel Type & Transmission row -->
+                            <div style="display: flex; gap: 0.75rem; justify-content: space-between;">
+                                <div style="display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Fuel Type</label>
+                                    <select id="filter-fuel" onchange="applyFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                        <option value="all">All</option>
+                                        <option value="Petrol">Petrol</option>
+                                        <option value="Diesel">Diesel</option>
+                                        <option value="CNG">CNG</option>
+                                    </select>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Transmission</label>
+                                    <select id="filter-transmission" onchange="applyFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                        <option value="all">All</option>
+                                        <option value="Manual">Manual</option>
+                                        <option value="Automatic">Automatic</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Car Type Filter -->
+                            <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Car Type</label>
+                                <select id="filter-car-type" onchange="applyFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                    <option value="all">All Types</option>
+                                    <option value="Hatchback">Hatchback</option>
+                                    <option value="Sedan">Sedan</option>
+                                    <option value="SUV">SUV</option>
+                                </select>
+                            </div>
+                            </div>
+                            <!-- ===== /CAR FILTER FIELDS ===== -->
+
+                            <!-- ===== BIKE FILTER FIELDS ===== -->
+                            <div id="bike-filter-fields" style="display: none; flex-direction: column; gap: 1rem;">
+                                <!-- Brand Filter -->
+                                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Brand</label>
+                                    <select id="bfilter-brand" onchange="applyBikeFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                        <option value="all">All Brands</option>
+                                        <option value="Hero">Hero</option>
+                                        <option value="Royal Enfield">Royal Enfield</option>
+                                        <option value="Honda">Honda</option>
+                                        <option value="Bajaj">Bajaj</option>
+                                        <option value="TVS">TVS</option>
+                                        <option value="Yamaha">Yamaha</option>
+                                        <option value="KTM">KTM</option>
+                                        <option value="Suzuki">Suzuki</option>
+                                    </select>
+                                </div>
+
+                                <!-- Price / Budget Filter -->
+                                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Budget (Max Price)</label>
+                                    <select id="bfilter-price" onchange="applyBikeFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                        <option value="all">Any Price</option>
+                                        <option value="0.5">Up to ₹50,000</option>
+                                        <option value="0.8">Up to ₹80,000</option>
+                                        <option value="1.2">Up to ₹1.2 Lakh</option>
+                                        <option value="2">Up to ₹2 Lakh</option>
+                                        <option value="3.5">Up to ₹3.5 Lakh</option>
+                                        <option value="6">Up to ₹6 Lakh</option>
+                                    </select>
+                                </div>
+
+                                <!-- Engine CC Filter -->
+                                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Engine (CC)</label>
+                                    <select id="bfilter-cc" onchange="applyBikeFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                        <option value="all">All Engine Sizes</option>
+                                        <option value="125">Up to 125 cc</option>
+                                        <option value="200">125 – 200 cc</option>
+                                        <option value="350">200 – 350 cc</option>
+                                        <option value="999">350 cc &amp; above</option>
+                                    </select>
+                                </div>
+
+                                <!-- Year Range Filter -->
+                                <div style="display: flex; gap: 0.75rem; justify-content: space-between;">
+                                    <div style="display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+                                        <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">From Year</label>
+                                        <select id="bfilter-min-year" onchange="applyBikeFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                            <option value="all">Min Year</option>
+                                            <option value="2017">2017</option>
+                                            <option value="2018">2018</option>
+                                            <option value="2019">2019</option>
+                                            <option value="2020">2020</option>
+                                            <option value="2021">2021</option>
+                                            <option value="2022">2022</option>
+                                            <option value="2023">2023</option>
+                                        </select>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+                                        <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">To Year</label>
+                                        <select id="bfilter-max-year" onchange="applyBikeFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                            <option value="all">Max Year</option>
+                                            <option value="2017">2017</option>
+                                            <option value="2018">2018</option>
+                                            <option value="2019">2019</option>
+                                            <option value="2020">2020</option>
+                                            <option value="2021">2021</option>
+                                            <option value="2022">2022</option>
+                                            <option value="2023">2023</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Owner Filter -->
+                                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">No. of Owners</label>
+                                    <select id="bfilter-owner" onchange="applyBikeFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                        <option value="all">Any Owner</option>
+                                        <option value="1">1st Owner Only</option>
+                                        <option value="2">2nd Owner Only</option>
+                                    </select>
+                                </div>
+
+                                <!-- Bike Type Filter -->
+                                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Bike Type</label>
+                                    <select id="bfilter-biketype" onchange="applyBikeFilters()" style="width: 100%; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-size: 0.9rem; background: #ffffff; color: #334155; font-weight: 500;">
+                                        <option value="all">All Types</option>
+                                        <option value="Bike">Bike</option>
+                                        <option value="Scooter">Scooter</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- ===== /BIKE FILTER FIELDS ===== -->
+
+                            <button onclick="resetFilters()" style="width: 100%; padding: 0.6rem; border: none; background: #f1f5f9; color: #475569; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background-color 0.2s; font-size: 0.85rem; margin-top: 0.25rem;">Reset Filters</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="listings-content-area">
+                <!-- Cars list (50 Indian Cars vertically) -->
+                <div id="cars-vertical-list" class="vertical-listings-list active">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+                
+                <!-- Bikes list (Coming soon) -->
+                <div id="bikes-vertical-list" class="vertical-listings-list">
+                    <div class="empty-state">
+                        <i class="ph ph-motorcycle" style="font-size: 3.5rem; color: #94a3b8; margin-bottom: 1rem;"></i>
+                        <h3>Bike Listings Coming Soon</h3>
+                        <p class="text-muted">We are currently focusing on completing the Car section first. Check back soon!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 1.5: Dashboard (Logged In) -->
+        <section id="dashboard-screen" class="screen bg-light">
+            <div class="container-standard py-5">
+                <div class="dashboard-header">
+                    <h1>Dashboard</h1>
+                    <p>Manage your listings, view used cars, and communicate with sellers.</p>
+                </div>
+
+                <div class="custom-tabs-container mb-4">
+                    <button class="custom-tab active" onclick="switchDashboardTab('used-cars')">Used Cars</button>
+                    <button class="custom-tab" onclick="switchDashboardTab('sell-car')">Sell Your Car</button>
+                    <button class="custom-tab" onclick="switchDashboardTab('listed-cars')">View Listed Car</button>
+                    <button class="custom-tab" onclick="switchDashboardTab('messages')">Messages</button>
+                </div>
+
+                <!-- Tab Content: Used Cars -->
+                <div id="tab-used-cars" class="tab-content active">
+                    <h2>Used Cars</h2>
+                    <p class="text-muted mb-4">Cars listed between ₹1 Lakh to ₹10 Lakh in your location.</p>
+                    <div class="car-grid">
+                        <!-- Indica -->
+                        <div class="car-card">
+                            <div class="car-image">
+                                <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=600&q=80" alt="Tata Indica">
+                                <button class="btn-icon heart"><i class="ph ph-heart"></i></button>
+                                <div class="badges">
+                                    <span class="badge verified"><i class="ph ph-shield-check"></i> Verified</span>
+                                </div>
+                            </div>
+                            <div class="car-info">
+                                <div class="price">₹ 1,50,000</div>
+                                <h3 class="title">Tata Indica V2</h3>
+                                <div class="details-row">
+                                    <span>2015</span> • <span>70,000 km</span> • <span>Diesel</span> • <span>Manual</span>
+                                </div>
+                                <div class="location"><i class="ph ph-map-pin"></i> Pune, Maharashtra</div>
+                                <div class="trust-score">Trust Score: <strong>85/100</strong></div>
+                            </div>
+                            <div class="car-actions">
+                                <button class="btn-primary full-width" onclick="navigateTo('details-screen')">View Details</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Swift -->
+                        <div class="car-card">
+                            <div class="car-image">
+                                <img src="https://images.unsplash.com/photo-1616455579100-2ceaa4eb2d37?auto=format&fit=crop&w=600&q=80" alt="Maruti Swift">
+                                <button class="btn-icon heart"><i class="ph ph-heart"></i></button>
+                                <div class="badges">
+                                    <span class="badge verified"><i class="ph ph-shield-check"></i> Verified</span>
+                                </div>
+                            </div>
+                            <div class="car-info">
+                                <div class="price">₹ 4,80,000</div>
+                                <h3 class="title">Maruti Suzuki Swift VXi</h3>
+                                <div class="details-row">
+                                    <span>2018</span> • <span>45,000 km</span> • <span>Petrol</span> • <span>Manual</span>
+                                </div>
+                                <div class="location"><i class="ph ph-map-pin"></i> Mumbai, Maharashtra</div>
+                                <div class="trust-score">Trust Score: <strong>92/100</strong></div>
+                            </div>
+                            <div class="car-actions">
+                                <button class="btn-primary full-width" onclick="navigateTo('details-screen')">View Details</button>
+                            </div>
+                        </div>
+
+                        <!-- Innova -->
+                        <div class="car-card">
+                            <div class="car-image">
+                                <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80" alt="Toyota Innova">
+                                <button class="btn-icon heart"><i class="ph ph-heart"></i></button>
+                                <div class="badges">
+                                    <span class="badge verified"><i class="ph ph-shield-check"></i> Verified</span>
+                                </div>
+                            </div>
+                            <div class="car-info">
+                                <div class="price">₹ 9,90,000</div>
+                                <h3 class="title">Toyota Innova 2.5 GX</h3>
+                                <div class="details-row">
+                                    <span>2016</span> • <span>95,000 km</span> • <span>Diesel</span> • <span>Manual</span>
+                                </div>
+                                <div class="location"><i class="ph ph-map-pin"></i> Bangalore, Karnataka</div>
+                                <div class="trust-score">Trust Score: <strong>95/100</strong></div>
+                            </div>
+                            <div class="car-actions">
+                                <button class="btn-primary full-width" onclick="navigateTo('details-screen')">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Sell Your Car -->
+                <div id="tab-sell-car" class="tab-content">
+                    <div class="card text-center py-5">
+                        <i class="ph ph-car-profile" style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                        <h2>Ready to sell your vehicle?</h2>
+                        <p class="text-muted mb-4">List your car or bike directly to buyers without dealer margins.</p>
+                        <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
+                            <button class="btn-primary" onclick="navigateTo('listing-guidelines-screen')"><i class="ph ph-car-simple"></i> Sell a Car</button>
+                            <button class="btn-secondary" onclick="navigateTo('bike-listing-guidelines-screen')"><i class="ph ph-motorcycle"></i> Sell a Bike</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: View Listed Car -->
+                <div id="tab-listed-cars" class="tab-content">
+                    <div class="card text-center py-5">
+                        <i class="ph ph-list-dashes" style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                        <h2>Your Listings</h2>
+                        <p class="text-muted mb-4">You have not listed any cars yet.</p>
+                        <button class="btn-secondary" onclick="navigateTo('listing-guidelines-screen')">Create your first listing</button>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Messages -->
+                <div id="tab-messages" class="tab-content">
+                    <div class="card text-center py-5">
+                        <i class="ph ph-chats" style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                        <h2>Your Messages</h2>
+                        <p class="text-muted mb-4">Manage your conversations with buyers and sellers.</p>
+                        <button class="btn-primary" onclick="navigateTo('messages-screen')">Go to Inbox</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: Login -->
+        <section id="login-screen" class="screen auth-screen">
+            <header class="auth-header-nav">
+                <div class="auth-logo" style="display: flex; align-items: center;">
+                    <img class="auth-logo-img" src="./logo.png" alt="FamilyCar" style="height: 44px; object-fit: contain;">
+                </div>
+                <div class="auth-nav-link" style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="theme-toggle-btn" onclick="toggleTheme()" style="background: rgba(0,0,0,0.05); border: none; font-size: 1.2rem; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; transition: all 0.2s;">
+                        <i class="ph ph-moon"></i>
+                    </button>
+                    <span>Don't have an Account? <a href="#" onclick="navigateTo('register-screen')">Sign up <i class="ph ph-arrow-right"></i></a></span>
+                </div>
+            </header>
+            <div class="auth-container">
+                <h2>Log in to your account</h2>
+                
+                <div class="oauth-buttons">
+                    <button class="btn-oauth btn-google" onclick="simulateLogin()">
+                        <span class="icon-circle">
+                            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 18 18">
+                                <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.24h2.91c1.7-1.56 2.68-3.86 2.68-6.57z"/>
+                                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.24c-.8.54-1.84.87-3.05.87-2.35 0-4.33-1.59-5.04-3.73H.96v2.3C2.44 15.96 5.47 18 9 18z"/>
+                                <path fill="#FBBC05" d="M3.96 10.72A5.41 5.41 0 0 1 3.68 9c0-.6.1-1.17.28-1.72V4.98H.96A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.96 4.02l3-2.3z"/>
+                                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59C13.47.89 11.43 0 9 0 5.47 0 2.44 2.04.96 4.98l3 2.3c.71-2.14 2.69-3.72 5.04-3.72z"/>
+                            </svg>
+                        </span>
+                        <span class="btn-text-oauth">LOG IN WITH GOOGLE</span>
+                    </button>
+                    
+                    <button class="btn-oauth btn-microsoft" onclick="simulateLogin()">
+                        <span class="icon-circle">
+                            <svg width="20" height="20" viewBox="0 0 23 23">
+                                <rect x="0" y="0" width="11" height="11" fill="#F25022"/>
+                                <rect x="12" y="0" width="11" height="11" fill="#7FBA00"/>
+                                <rect x="0" y="12" width="11" height="11" fill="#00A1F1"/>
+                                <rect x="12" y="12" width="11" height="11" fill="#FFB900"/>
+                            </svg>
+                        </span>
+                        <span class="btn-text-oauth">LOG IN WITH MICROSOFT</span>
+                    </button>
+                    
+                    <button class="btn-oauth btn-mobile" onclick="showMobileLoginModal()">
+                        <span class="icon-circle">
+                            <i class="ph ph-device-mobile"></i>
+                        </span>
+                        <span class="btn-text-oauth">LOG IN WITH MOBILE</span>
+                    </button>
+                </div>
+                
+                <div class="divider-text">or</div>
+                
+                <form onsubmit="event.preventDefault(); handleLogin();" class="auth-form">
+                    <div class="form-group-custom">
+                        <i class="ph ph-user input-icon"></i>
+                        <input type="text" id="login-email" placeholder="Email" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <i class="ph ph-lock input-icon"></i>
+                        <input type="password" id="login-password" placeholder="Password" required>
+                    </div>
+                    <div class="forgot-password-container">
+                        <a href="#" class="forgot-password-link">Don't remember your password?</a>
+                    </div>
+                    <button type="submit" class="btn-submit-pill">Log In</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 3: Registration -->
+        <section id="register-screen" class="screen auth-screen">
+            <header class="auth-header-nav">
+                <div class="auth-logo" style="display: flex; align-items: center;">
+                    <img class="auth-logo-img" src="./logo.png" alt="FamilyCar" style="height: 44px; object-fit: contain;">
+                </div>
+                <div class="auth-nav-link" style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="theme-toggle-btn" onclick="toggleTheme()" style="background: rgba(0,0,0,0.05); border: none; font-size: 1.2rem; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; transition: all 0.2s;">
+                        <i class="ph ph-moon"></i>
+                    </button>
+                    <span>Already have an Account? <a href="#" onclick="navigateTo('login-screen')">Sign in <i class="ph ph-arrow-right"></i></a></span>
+                </div>
+            </header>
+            <div class="auth-container">
+                <h2>Create your account</h2>
+                
+                <div class="oauth-buttons">
+                    <button class="btn-oauth btn-google" onclick="simulateLogin()">
+                        <span class="icon-circle">
+                            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 18 18">
+                                <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.24h2.91c1.7-1.56 2.68-3.86 2.68-6.57z"/>
+                                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.24c-.8.54-1.84.87-3.05.87-2.35 0-4.33-1.59-5.04-3.73H.96v2.3C2.44 15.96 5.47 18 9 18z"/>
+                                <path fill="#FBBC05" d="M3.96 10.72A5.41 5.41 0 0 1 3.68 9c0-.6.1-1.17.28-1.72V4.98H.96A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.96 4.02l3-2.3z"/>
+                                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59C13.47.89 11.43 0 9 0 5.47 0 2.44 2.04.96 4.98l3 2.3c.71-2.14 2.69-3.72 5.04-3.72z"/>
+                            </svg>
+                        </span>
+                        <span class="btn-text-oauth">SIGN UP WITH GOOGLE</span>
+                    </button>
+                    
+                    <button class="btn-oauth btn-microsoft" onclick="simulateLogin()">
+                        <span class="icon-circle">
+                            <svg width="20" height="20" viewBox="0 0 23 23">
+                                <rect x="0" y="0" width="11" height="11" fill="#F25022"/>
+                                <rect x="12" y="0" width="11" height="11" fill="#7FBA00"/>
+                                <rect x="0" y="12" width="11" height="11" fill="#00A1F1"/>
+                                <rect x="12" y="12" width="11" height="11" fill="#FFB900"/>
+                            </svg>
+                        </span>
+                        <span class="btn-text-oauth">SIGN UP WITH MICROSOFT</span>
+                    </button>
+                    
+                    <button class="btn-oauth btn-mobile" onclick="showMobileLoginModal()">
+                        <span class="icon-circle">
+                            <i class="ph ph-device-mobile"></i>
+                        </span>
+                        <span class="btn-text-oauth">SIGN UP WITH MOBILE</span>
+                    </button>
+                </div>
+                
+                <div class="divider-text">or</div>
+                
+                <form onsubmit="event.preventDefault(); handleRegister();" class="auth-form">
+                    <div class="form-group-custom">
+                        <i class="ph ph-user-circle input-icon"></i>
+                        <input type="text" id="register-name" placeholder="Full Name" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <i class="ph ph-envelope input-icon"></i>
+                        <input type="email" id="register-email" placeholder="Email" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <i class="ph ph-device-mobile input-icon"></i>
+                        <input type="tel" id="register-mobile" placeholder="Mobile" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <i class="ph ph-lock input-icon"></i>
+                        <input type="password" id="register-password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn-submit-pill">Sign Up</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: Browse Cars -->
+        <section id="browse-screen" class="screen">
+            <!-- Top Search Bar -->
+            <div class="search-bar-container">
+                <div class="search-bar">
+                    <div class="search-field flex-2">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" placeholder="Search Brand, Model...">
+                    </div>
+                    <div class="search-field">
+                        <i class="ph ph-map-pin"></i>
+                        <select>
+                            <option>All Cities</option>
+                            <option>Mumbai</option>
+                            <option>Delhi</option>
+                            <option>Bangalore</option>
+                        </select>
+                    </div>
+                    <div class="search-field toggle-field">
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <span>Verified Only</span>
+                    </div>
+                    <button class="btn-primary">Search</button>
+                </div>
+                <div class="sort-bar">
+                    <span>Showing 124 Verified Cars</span>
+                    <div class="sort-dropdown">
+                        Sort by: 
+                        <select>
+                            <option>Most Trusted</option>
+                            <option>Newest</option>
+                            <option>Lowest Price</option>
+                            <option>Highest Price</option>
+                            <option>Nearest</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="browse-layout container-standard mt-4">
+                <!-- Left Sidebar Filters -->
+                <aside class="filters-sidebar">
+                    <h3>Filters</h3>
+                    
+                    <div class="filter-group">
+                        <h4>Price Range</h4>
+                        <input type="range" min="100000" max="5000000" class="range-slider">
+                        <div class="range-labels">
+                            <span>₹1L</span>
+                            <span>₹50L+</span>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <h4>Brand</h4>
+                        <label class="checkbox-label"><input type="checkbox"> Maruti Suzuki (45)</label>
+                        <label class="checkbox-label"><input type="checkbox"> Hyundai (32)</label>
+                        <label class="checkbox-label"><input type="checkbox"> Honda (24)</label>
+                        <label class="checkbox-label"><input type="checkbox"> Tata (18)</label>
+                        <label class="checkbox-label"><input type="checkbox"> Kia (12)</label>
+                        <a href="#" class="link small">Show more</a>
+                    </div>
+
+                    <div class="filter-group">
+                        <h4>Fuel Type</h4>
+                        <label class="checkbox-label"><input type="checkbox"> Petrol</label>
+                        <label class="checkbox-label"><input type="checkbox"> Diesel</label>
+                        <label class="checkbox-label"><input type="checkbox"> CNG</label>
+                        <label class="checkbox-label"><input type="checkbox"> Electric</label>
+                    </div>
+
+                    <div class="filter-group">
+                        <h4>Transmission</h4>
+                        <label class="checkbox-label"><input type="checkbox"> Automatic</label>
+                        <label class="checkbox-label"><input type="checkbox"> Manual</label>
+                    </div>
+
+                    <div class="filter-group">
+                        <h4>Car Type</h4>
+                        <label class="checkbox-label"><input type="checkbox"> Hatchback</label>
+                        <label class="checkbox-label"><input type="checkbox"> Sedan</label>
+                        <label class="checkbox-label"><input type="checkbox"> SUV</label>
+                    </div>
+
+                    <div class="filter-group">
+                        <h4>Owner</h4>
+                        <label class="checkbox-label"><input type="checkbox"> 1st Owner</label>
+                        <label class="checkbox-label"><input type="checkbox"> 2nd Owner</label>
+                    </div>
+                </aside>
+
+                <!-- Main Grid -->
+                <div class="browse-grid">
+                    <div class="car-card">
+                        <div class="car-image">
+                            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80" alt="Car">
+                            <button class="btn-icon heart"><i class="ph ph-heart"></i></button>
+                            <div class="badges">
+                                <span class="badge verified"><i class="ph ph-shield-check"></i> Owner Verified</span>
+                                <span class="badge verified"><i class="ph ph-file-text"></i> RC Verified</span>
+                            </div>
+                        </div>
+                        <div class="car-info">
+                            <div class="price-row">
+                                <div class="price">₹ 14,50,000</div>
+                                <div class="interested"><i class="ph ph-users"></i> 12 Interested</div>
+                            </div>
+                            <h3 class="title">Hyundai Creta SX Opt</h3>
+                            <div class="details-row">
+                                <span>2021</span> • <span>24,000 km</span> • <span>Petrol</span> • <span>Auto</span>
+                            </div>
+                            <div class="location"><i class="ph ph-map-pin"></i> Mumbai</div>
+                            <div class="trust-score">Trust Score: <strong>98/100</strong></div>
+                        </div>
+                        <div class="car-actions">
+                            <button class="btn-secondary flex-1">Save</button>
+                            <button class="btn-primary flex-2" onclick="navigateTo('details-screen')">View Details</button>
+                        </div>
+                    </div>
+                    
+                    <div class="car-card">
+                        <div class="car-image">
+                            <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80" alt="Car">
+                            <button class="btn-icon heart"><i class="ph ph-heart"></i></button>
+                            <div class="badges">
+                                <span class="badge verified"><i class="ph ph-shield-check"></i> Owner Verified</span>
+                                <span class="badge verified"><i class="ph ph-file-text"></i> RC Verified</span>
+                            </div>
+                        </div>
+                        <div class="car-info">
+                            <div class="price-row">
+                                <div class="price">₹ 11,20,000</div>
+                                <div class="interested"><i class="ph ph-users"></i> 5 Interested</div>
+                            </div>
+                            <h3 class="title">Honda City ZX CVT</h3>
+                            <div class="details-row">
+                                <span>2020</span> • <span>35,000 km</span> • <span>Petrol</span> • <span>Auto</span>
+                            </div>
+                            <div class="location"><i class="ph ph-map-pin"></i> Delhi</div>
+                            <div class="trust-score">Trust Score: <strong>95/100</strong></div>
+                        </div>
+                        <div class="car-actions">
+                            <button class="btn-secondary flex-1">Save</button>
+                            <button class="btn-primary flex-2" onclick="navigateTo('details-screen')">View Details</button>
+                        </div>
+                    </div>
+                    
+                     <div class="car-card">
+                        <div class="car-image">
+                            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80" alt="Kia Seltos">
+                            <button class="btn-icon heart"><i class="ph ph-heart"></i></button>
+                            <div class="badges">
+                                <span class="badge verified"><i class="ph ph-shield-check"></i> Owner Verified</span>
+                                <span class="badge verified"><i class="ph ph-file-text"></i> RC Verified</span>
+                            </div>
+                        </div>
+                        <div class="car-info">
+                            <div class="price-row">
+                                <div class="price">₹ 15,80,000</div>
+                                <div class="interested"><i class="ph ph-users"></i> 8 Interested</div>
+                            </div>
+                            <h3 class="title">Kia Seltos GTX Plus</h3>
+                            <div class="details-row">
+                                <span>2022</span> • <span>18,000 km</span> • <span>Diesel</span> • <span>Auto</span>
+                            </div>
+                            <div class="location"><i class="ph ph-map-pin"></i> Bangalore</div>
+                            <div class="trust-score">Trust Score: <strong>99/100</strong></div>
+                        </div>
+                        <div class="car-actions">
+                            <button class="btn-secondary flex-1">Save</button>
+                            <button class="btn-primary flex-2" onclick="navigateTo('details-screen')">View Details</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 5: Car Details -->
+        <section id="details-screen" class="screen">
+            <div class="container-standard py-3" style="max-width: 1200px;">
+                <div style="margin-top: 1rem; margin-bottom: 0;">
+                    <button class="btn-secondary" onclick="navigateTo('home-screen')" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; border-radius: 9999px; font-weight: 700; height: 38px;">
+                        <i class="ph ph-arrow-left"></i> Back to Home
+                    </button>
+                </div>
+            </div>
+            <div class="details-layout container-standard mt-2">
+                <div class="details-main">
+                    <!-- Image Gallery -->
+                    <div class="gallery">
+                        <div class="main-image">
+                            <img id="details-main-img" src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80" alt="Car Main">
+                            <div class="view-360">
+                                <i class="ph ph-arrows-out-line-horizontal"></i> 360° View
+                            </div>
+                        </div>
+                        <div class="thumbnail-strip">
+                            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=200&q=80" class="active">
+                            <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=200&q=80">
+                            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=200&q=80">
+                            <img src="https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=200&q=80">
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Info -->
+                    <div class="vehicle-info-section card mt-4">
+                        <div class="title-row">
+                            <div>
+                                <h1 id="details-title">Hyundai Creta SX Opt</h1>
+                                <p class="location-text"><i class="ph ph-map-pin"></i> <span id="details-location-text">Mumbai, Maharashtra • Posted 2 days ago</span></p>
+                            </div>
+                            <div class="price-block">
+                                <div class="price-large" id="details-price">₹ 14,50,000</div>
+                                <div class="negotiable">Price Negotiable</div>
+                            </div>
+                        </div>
+
+                        <div class="specs-grid mt-4">
+                            <div class="spec-item"><i class="ph ph-calendar"></i> <div><span>Year</span><strong id="details-year">2021</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-gauge"></i> <div><span>Mileage</span><strong id="details-mileage">24,000 km</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-gas-pump"></i> <div><span>Fuel</span><strong id="details-fuel">Petrol</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-steering-wheel"></i> <div><span>Transmission</span><strong id="details-transmission">Automatic</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-users"></i> <div><span>Owners</span><strong id="details-owners">1st Owner</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-palette"></i> <div><span>Color</span><strong id="details-color">Polar White</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-shield"></i> <div><span>Insurance</span><strong>Comprehensive</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-bank"></i> <div><span>Loan</span><strong>None</strong></div></div>
+                        </div>
+
+                        <div class="description-block mt-5">
+                            <h3>Description</h3>
+                            <p id="details-description">Single-hand driven family car in pristine condition. All services done at authorized Hyundai service center. Zero dep insurance valid till end of year. Selling because upgrading to a 7-seater SUV. No dealers please. Price slightly negotiable for genuine buyers.</p>
+                            <ul>
+                                <li>Full service history available</li>
+                                <li>Non-accidental, original paint</li>
+                                <li>Stepney unused</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-sidebar">
+                    <!-- Verification Section -->
+                    <div class="verification-card card">
+                        <div class="trust-score-large">
+                            <span class="score" id="details-trust-score">98</span>
+                            <span class="out-of">/100</span>
+                            <p>Trust Score</p>
+                        </div>
+                        <div class="verification-list">
+                            <div class="verified-item"><i class="ph ph-check-circle green"></i> RC Verified</div>
+                            <div class="verified-item"><i class="ph ph-check-circle green"></i> Identity Verified</div>
+                            <div class="verified-item"><i class="ph ph-check-circle green"></i> Phone Verified</div>
+                            <div class="verified-item"><i class="ph ph-check-circle green"></i> Address Verified</div>
+                        </div>
+                        <hr>
+                        <div class="owner-info">
+                            <div class="avatar-small" id="details-owner-avatar">M</div>
+                            <div>
+                                <p class="name"><span id="details-owner-name">Manish K.</span> <span class="badge small">Verified Owner</span></p>
+                                <p class="hidden-text"><i class="ph ph-lock-key"></i> Phone number hidden for privacy</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="action-card card mt-4">
+                        <button class="btn-primary full-width large mb-3" onclick="openOfferModal(currentDetailsId)">Send Message / Offer</button>
+                        <button class="btn-secondary full-width large mb-3">Schedule Inspection (Future)</button>
+                        
+                        <div class="secondary-actions">
+                            <button class="btn-text"><i class="ph ph-heart"></i> Save Car</button>
+                            <button class="btn-text"><i class="ph ph-share-network"></i> Share</button>
+                            <button class="btn-text text-red"><i class="ph ph-flag"></i> Report Listing</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Similar Cars -->
+            <div class="section similar-cars container-standard">
+                <h2>Similar Verified Cars</h2>
+                <div class="car-slider mt-4">
+                    <!-- Simplified cards for slider -->
+                    <div class="car-card mini">
+                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400" alt="Car">
+                        <div class="info">
+                            <h4>Kia Seltos GTX</h4>
+                            <div class="price">₹ 15,80,000</div>
+                        </div>
+                    </div>
+                    <div class="car-card mini">
+                        <img src="https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=400" alt="Car">
+                        <div class="info">
+                            <h4>Tata Nexon XZA+</h4>
+                            <div class="price">₹ 9,50,000</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 5B: Bike Details -->
+        <section id="bike-details-screen" class="screen">
+            <div class="container-standard py-3" style="max-width: 1200px;">
+                <div style="margin-top: 1rem; margin-bottom: 0;">
+                    <button class="btn-secondary" onclick="navigateTo('home-screen')" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; border-radius: 9999px; font-weight: 700; height: 38px;">
+                        <i class="ph ph-arrow-left"></i> Back to Home
+                    </button>
+                </div>
+            </div>
+            <div class="details-layout container-standard mt-2">
+                <div class="details-main">
+                    <!-- Image Gallery -->
+                    <div class="gallery">
+                        <div class="main-image">
+                            <img id="bike-details-main-img" src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?auto=format&fit=crop&w=1200&q=80" alt="Bike Main">
+                            <div class="view-360">
+                                <i class="ph ph-arrows-out-line-horizontal"></i> 360° View
+                            </div>
+                        </div>
+                        <div class="thumbnail-strip">
+                            <img src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?auto=format&fit=crop&w=200&q=80" class="active">
+                            <img src="https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=200&q=80">
+                            <img src="https://images.unsplash.com/photo-1622185135505-2d795003994a?auto=format&fit=crop&w=200&q=80">
+                            <img src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=200&q=80">
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Info -->
+                    <div class="vehicle-info-section card mt-4">
+                        <div class="title-row">
+                            <div>
+                                <h1 id="bike-details-title">Royal Enfield Classic 350</h1>
+                                <p class="location-text"><i class="ph ph-map-pin"></i> <span id="bike-details-location-text">Pune, Maharashtra • Posted recently</span></p>
+                            </div>
+                            <div class="price-block">
+                                <div class="price-large" id="bike-details-price">₹ 1.65 Lakh</div>
+                                <div class="negotiable">Price Negotiable</div>
+                            </div>
+                        </div>
+
+                        <div class="specs-grid mt-4">
+                            <div class="spec-item"><i class="ph ph-calendar"></i> <div><span>Year</span><strong id="bike-details-year">2021</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-gauge"></i> <div><span>Odometer</span><strong id="bike-details-mileage">18,000 km</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-engine"></i> <div><span>Engine</span><strong id="bike-details-cc">349 cc</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-drop"></i> <div><span>Mileage</span><strong id="bike-details-kmpl">40 kmpl</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-gas-pump"></i> <div><span>Fuel</span><strong id="bike-details-fuel">Petrol</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-users"></i> <div><span>Owners</span><strong id="bike-details-owners">1st Owner</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-shield-check"></i> <div><span>Braking</span><strong id="bike-details-abs">Single-Channel ABS</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-motorcycle"></i> <div><span>Type</span><strong id="bike-details-biketype">Cruiser</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-palette"></i> <div><span>Color</span><strong id="bike-details-color">Black</strong></div></div>
+                            <div class="spec-item"><i class="ph ph-shield"></i> <div><span>Insurance</span><strong>Comprehensive</strong></div></div>
+                        </div>
+
+                        <div class="description-block mt-5">
+                            <h3>Description</h3>
+                            <p id="bike-details-description">Well-maintained two-wheeler, regularly serviced with original documents. Genuine buyers only, no dealers.</p>
+                            <ul>
+                                <li>Full service history available</li>
+                                <li>Non-accidental, original condition</li>
+                                <li>New tyres &amp; battery</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-sidebar">
+                    <!-- Verification Section -->
+                    <div class="verification-card card">
+                        <div class="trust-score-large">
+                            <span class="score" id="bike-details-trust-score">92</span>
+                            <span class="out-of">/100</span>
+                            <p>Trust Score</p>
+                        </div>
+                        <div class="verification-list">
+                            <div class="verified-item"><i class="ph ph-check-circle green"></i> RC Verified</div>
+                            <div class="verified-item"><i class="ph ph-check-circle green"></i> Identity Verified</div>
+                            <div class="verified-item"><i class="ph ph-check-circle green"></i> Phone Verified</div>
+                            <div class="verified-item"><i class="ph ph-check-circle green"></i> Address Verified</div>
+                        </div>
+                        <hr>
+                        <div class="owner-info">
+                            <div class="avatar-small" id="bike-details-owner-avatar">R</div>
+                            <div>
+                                <p class="name"><span id="bike-details-owner-name">Rahul S.</span> <span class="badge small">Verified Owner</span></p>
+                                <p class="hidden-text"><i class="ph ph-lock-key"></i> Phone number hidden for privacy</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="action-card card mt-4">
+                        <button class="btn-primary full-width large mb-3" onclick="openOfferModal(currentDetailsId)">Send Message / Offer</button>
+                        <button class="btn-secondary full-width large mb-3">Schedule Inspection (Future)</button>
+
+                        <div class="secondary-actions">
+                            <button class="btn-text"><i class="ph ph-heart"></i> Save Bike</button>
+                            <button class="btn-text"><i class="ph ph-share-network"></i> Share</button>
+                            <button class="btn-text text-red"><i class="ph ph-flag"></i> Report Listing</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Similar Bikes -->
+            <div class="section similar-cars container-standard">
+                <h2>Similar Verified Bikes</h2>
+                <div class="car-slider mt-4">
+                    <div class="car-card mini">
+                        <img src="https://images.unsplash.com/photo-1558981001-792f6c0d5068?w=400" alt="Bike">
+                        <div class="info">
+                            <h4>RE Meteor 350</h4>
+                            <div class="price">₹ 1.85 Lakh</div>
+                        </div>
+                    </div>
+                    <div class="car-card mini">
+                        <img src="https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=400" alt="Bike">
+                        <div class="info">
+                            <h4>Bajaj Pulsar NS200</h4>
+                            <div class="price">₹ 0.98 Lakh</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 6: Send Offer Modal (Hidden by default) -->
+        <div class="modal-overlay" id="offer-modal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>Contact Seller</h3>
+                    <button class="btn-icon" onclick="closeOfferModal()"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="car-summary-small mb-4">
+                        <img id="offer-modal-img" src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=200" alt="Car">
+                        <div>
+                            <h4 id="offer-modal-title">Hyundai Creta SX Opt</h4>
+                            <p>Listed Price: <strong id="offer-modal-listed-price">₹ 14,50,000</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Your Offer Price (₹)</label>
+                        <input type="number" id="offer-modal-price-input" value="1400000" class="large-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Message (Optional)</label>
+                        <textarea rows="4">Hi, I am interested in your car. Is it still available? I am ready to close the deal this week if the price is right.</textarea>
+                    </div>
+
+                    <div class="privacy-note mt-3">
+                        <i class="ph ph-lock-key"></i>
+                        <p>All conversations happen inside FamilyCar. Personal contact details remain hidden until both parties agree.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeOfferModal()">Cancel</button>
+                    <button class="btn-primary" onclick="sendMessageAndGoToInbox()">Send Offer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 7: Messages -->
+        <section id="messages-screen" class="screen bg-light">
+            <div class="container-standard py-3" style="max-width: 1200px;">
+                <div style="margin-top: 1rem; margin-bottom: 0;">
+                    <button class="btn-secondary" onclick="navigateTo('home-screen')" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; border-radius: 9999px; font-weight: 700; height: 38px;">
+                        <i class="ph ph-arrow-left"></i> Back to Home
+                    </button>
+                </div>
+            </div>
+            <div class="messages-layout container-standard py-2">
+                <!-- Chat List -->
+                <div class="chat-list card">
+                    <div class="chat-list-header">
+                        <h2>Messages</h2>
+                    </div>
+                    <div class="chat-item active">
+                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=100" class="chat-thumb" alt="Car">
+                        <div class="chat-preview">
+                            <div class="chat-title-row">
+                                <h4>Manish K.</h4>
+                                <span class="time">10:42 AM</span>
+                            </div>
+                            <p class="subject">Hyundai Creta SX Opt</p>
+                            <p class="last-message fw-bold">I can do 14.2L, final.</p>
+                        </div>
+                        <div class="unread-badge">1</div>
+                    </div>
+                    <div class="chat-item">
+                        <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=100" class="chat-thumb" alt="Car">
+                        <div class="chat-preview">
+                            <div class="chat-title-row">
+                                <h4>Rahul S.</h4>
+                                <span class="time">Yesterday</span>
+                            </div>
+                            <p class="subject">Honda City ZX CVT</p>
+                            <p class="last-message">Is it still available?</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Window -->
+                <div class="chat-window card p-0">
+                    <div class="chat-header">
+                        <div class="chat-header-info">
+                            <h3>Manish K. <span class="badge verified small"><i class="ph ph-shield-check"></i> Verified Owner</span></h3>
+                            <p class="status">Hyundai Creta SX Opt (₹ 14,50,000)</p>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="btn-secondary small">View Listing</button>
+                            <button class="btn-icon"><i class="ph ph-dots-three-vertical"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages">
+                        <div class="system-message">
+                            <span>Conversation started yesterday</span>
+                        </div>
+                        
+                        <div class="message sent">
+                            <div class="bubble">
+                                Hi, I am interested in your car. Is it still available? I am ready to close the deal this week.
+                            </div>
+                            <span class="time">Yesterday, 4:00 PM</span>
+                        </div>
+                        
+                        <div class="offer-card sent-offer">
+                            <div class="offer-header">You made an offer</div>
+                            <div class="offer-price">₹ 14,00,000</div>
+                            <div class="offer-status pending">Pending</div>
+                        </div>
+
+                        <div class="message received">
+                            <div class="bubble">
+                                Hello! Yes, it's available. However, 14L is a bit low for me. The car is in immaculate condition.
+                            </div>
+                            <span class="time">Yesterday, 5:30 PM</span>
+                        </div>
+
+                        <div class="message received">
+                            <div class="bubble">
+                                I can do 14.2L, final. Let me know if that works.
+                            </div>
+                            <span class="time">Today, 10:42 AM</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <div class="quick-replies mb-2">
+                            <button class="chip">Accept Offer</button>
+                            <button class="chip">Reject Offer</button>
+                            <button class="chip">Counter Offer</button>
+                            <button class="chip">Mark Sold</button>
+                        </div>
+                        <div class="input-box">
+                            <button class="btn-icon"><i class="ph ph-paperclip"></i></button>
+                            <input type="text" placeholder="Type a message...">
+                            <button class="btn-primary icon-only"><i class="ph ph-paper-plane-right"></i></button>
+                        </div>
+                        <p class="security-note mt-2 text-center"><i class="ph ph-lock-key"></i> No phone numbers visible. Personal details are hidden.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 8A: Listing Guidelines (shown before upload flow) -->
+        <section id="listing-guidelines-screen" class="screen bg-light">
+            <div class="container-standard py-5" style="max-width: 780px;">
+
+                <!-- Back nav -->
+                <div style="margin-bottom: 1.5rem;">
+                    <button class="btn-secondary" onclick="goBackFromGuidelines()" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 1.2rem;border-radius:9999px;font-weight:700;height:38px;">
+                        <i class="ph ph-arrow-left"></i> Back
+                    </button>
+                </div>
+
+                <!-- Tagline badge -->
+                <div style="text-align:center;margin-bottom:1.5rem;">
+                    <span class="guidelines-tagline-badge">
+                        <i class="ph ph-shield-check"></i>&nbsp; Only Genuine Owners. No Dealer Spam.
+                    </span>
+                </div>
+
+                <!-- Page header -->
+                <div style="text-align:center;margin-bottom:2rem;">
+                    <h2 style="font-size:1.65rem;margin-bottom:0.5rem;">FamilyCar Listing Guidelines</h2>
+                    <p style="color:var(--text-muted);font-size:0.95rem;max-width:520px;margin:0 auto;line-height:1.6;">
+                        Please read these important rules before listing your car. They help keep FamilyCar a trusted, spam-free marketplace.
+                    </p>
+                </div>
+
+                <!-- Guidelines card -->
+                <div class="guidelines-card">
+                    <ol class="guidelines-list">
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-calendar-blank"></i></div>
+                            <div>
+                                <strong>One Car Every 6 Months</strong>
+                                <p>One user can list only <em>one car within a 6-month period</em>.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-user-check"></i></div>
+                            <div>
+                                <strong>Only Your Own Car</strong>
+                                <p>You can list only a vehicle <em>owned by you or your immediate family member</em>. Ownership verification may be required.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-file-text"></i></div>
+                            <div>
+                                <strong>RC Upload is Mandatory</strong>
+                                <p>A valid <em>Registration Certificate (RC)</em> must be uploaded to verify the vehicle.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-hash"></i></div>
+                            <div>
+                                <strong>Vehicle Number is Mandatory</strong>
+                                <p>You must provide the correct registration number. It will be used to identify and verify the vehicle.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-copy-simple"></i></div>
+                            <div>
+                                <strong>One Car, One Listing</strong>
+                                <p>The same vehicle <em>cannot have multiple active listings</em> on FamilyCar, even from different accounts.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-storefront"></i></div>
+                            <div>
+                                <strong>No Dealers or Commercial Sellers</strong>
+                                <p>FamilyCar is designed for <em>genuine individual owners</em>. Dealers, brokers, agents, and commercial resellers are not allowed to list vehicles.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-warning-octagon"></i></div>
+                            <div>
+                                <strong>Dealer Activity May Lead to Restriction</strong>
+                                <p>Accounts showing dealer-like activity, repeated listings, multiple vehicles, suspicious addresses, or attempts to bypass listing limits may be <em>reviewed or restricted</em>.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-users-three"></i></div>
+                            <div>
+                                <strong>Do Not Create Multiple Accounts</strong>
+                                <p>Creating additional accounts to bypass the 6-month listing limit is prohibited and may result in <em>all associated accounts being suspended</em>.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-camera"></i></div>
+                            <div>
+                                <strong>Upload Real and Recent Photos</strong>
+                                <p>Upload clear, recent photos of the <em>actual car being sold</em>. Images downloaded from the internet or taken from another listing are not allowed.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-check-square"></i></div>
+                            <div>
+                                <strong>Provide Accurate Information</strong>
+                                <p>Mileage, ownership, model, year, condition, accident history, asking price, and other information should be accurate. Intentionally misleading information may result in listing removal.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-magnifying-glass"></i></div>
+                            <div>
+                                <strong>Listings Are Subject to Verification</strong>
+                                <p>Submitting a listing does <em>not guarantee immediate publication</em>. FamilyCar may verify the vehicle, documents, seller information, and listing before making it live.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-shield-warning"></i></div>
+                            <div>
+                                <strong>Suspicious Listings May Require Additional Verification</strong>
+                                <p>FamilyCar may request additional documents or information if unusual or suspicious activity is detected.</p>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Trust statement + CTA -->
+                <div class="guidelines-cta-box">
+                    <div class="guidelines-trust-msg">
+                        <i class="ph ph-hand-heart"></i>
+                        <div>
+                            <strong>FamilyCar is for genuine owners, not dealers.</strong>
+                            <p>By continuing, you confirm that the vehicle information provided by you is genuine and that you understand FamilyCar's listing rules.</p>
+                        </div>
+                    </div>
+
+                    <label class="guidelines-checkbox-label" id="guidelines-agree-label">
+                        <input type="checkbox" id="guidelines-agree-checkbox" onchange="toggleGuidelinesBtn()">
+                        <span class="guidelines-checkbox-box"><i class="ph ph-check"></i></span>
+                        <span>I have read and agree to the FamilyCar Vehicle Listing Guidelines.</span>
+                    </label>
+
+                    <button id="guidelines-continue-btn" class="guidelines-continue-btn" disabled onclick="navigateTo('upload-screen')">
+                        <i class="ph ph-car-simple"></i> Continue to List My Car
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SCREEN 8: Upload Car -->
+        <section id="upload-screen" class="screen bg-light">
+            <div class="upload-container container-small py-5">
+                <div class="upload-header text-center mb-5">
+                    <h2>Sell Your Car</h2>
+                    <p class="subtitle">List directly to thousands of genuine buyers.</p>
+                </div>
+                
+                <!-- Progress Stepper -->
+                <div class="stepper mb-5">
+                    <div class="step active" id="step-1-indicator">
+                        <div class="step-circle"><i class="ph ph-identification-badge"></i></div>
+                        <span>Verification</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step-2-indicator">
+                        <div class="step-circle"><i class="ph ph-list-dashes"></i></div>
+                        <span>Details</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step-3-indicator">
+                        <div class="step-circle"><i class="ph ph-camera"></i></div>
+                        <span>Photos</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step-4-indicator">
+                        <div class="step-circle"><i class="ph ph-check-circle"></i></div>
+                        <span>Review</span>
+                    </div>
+                </div>
+
+                <!-- Step 1: Verification -->
+                <div class="upload-step active" id="step-1">
+                    <div class="card p-5">
+                        <h3 class="mb-2">Vehicle Verification</h3>
+                        <p class="subtitle mb-4">We need your RC to verify ownership.</p>
+                        
+                        <div class="form-group">
+                            <label>Vehicle Number *</label>
+                            <input type="text" placeholder="e.g. MH 02 AB 1234" class="uppercase-input" required>
+                        </div>
+
+                        <div class="upload-zones row gap-4 mt-4">
+                            <div class="upload-zone flex-1">
+                                <i class="ph ph-file-text large-icon"></i>
+                                <strong>Upload RC Front *</strong>
+                                <small>JPG, PNG or PDF</small>
+                            </div>
+                            <div class="upload-zone flex-1">
+                                <i class="ph ph-file-text large-icon"></i>
+                                <strong>Upload RC Back *</strong>
+                                <small>JPG, PNG or PDF</small>
+                            </div>
+                        </div>
+
+                        <label class="checkbox-label mt-4">
+                            <input type="checkbox" required> I confirm I am the legal owner of this vehicle.
+                        </label>
+
+                        <div class="alert alert-warning mt-4">
+                            <i class="ph ph-warning"></i>
+                            <div>
+                                <strong>Warning</strong>
+                                <p>Uploading someone else's vehicle or providing false information will result in permanent account suspension.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-actions mt-5 flex-end">
+                            <button class="btn-primary large" onclick="nextStep(2)">Continue to Details <i class="ph ph-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Details (Hidden initially) -->
+                <div class="upload-step" id="step-2" style="display: none;">
+                    <div class="card p-5">
+                        <h3 class="mb-4">Vehicle Information</h3>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Brand</label>
+                                <select><option>Select Brand</option><option>Hyundai</option><option>Maruti Suzuki</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Model</label>
+                                <select><option>Select Model</option><option>Creta</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Variant</label>
+                                <input type="text" placeholder="e.g. SX Opt">
+                            </div>
+                            <div class="form-group">
+                                <label>Registration Year</label>
+                                <select><option>2021</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Fuel Type</label>
+                                <select><option>Petrol</option><option>Diesel</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Transmission</label>
+                                <select><option>Automatic</option><option>Manual</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Car Type *</label>
+                                <select id="upload-car-type" required>
+                                    <option value="">Select Car Type</option>
+                                    <option value="Hatchback">Hatchback</option>
+                                    <option value="Sedan">Sedan</option>
+                                    <option value="SUV">SUV</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Kilometers Driven</label>
+                                <input type="number" placeholder="e.g. 24000">
+                            </div>
+                            <div class="form-group">
+                                <label>Color</label>
+                                <input type="text" placeholder="e.g. White">
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Owners</label>
+                                <select><option>1st</option><option>2nd</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Expected Price (₹)</label>
+                                <input type="number" placeholder="e.g. 1450000">
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <label>Reason for Selling</label>
+                            <input type="text" placeholder="e.g. Upgrading to a new car">
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <label>Description</label>
+                            <textarea rows="4" placeholder="Describe the condition of your car, service history, etc."></textarea>
+                        </div>
+
+                        <div class="step-actions mt-5 flex-between">
+                            <button class="btn-secondary large" onclick="nextStep(1)"><i class="ph ph-arrow-left"></i> Back</button>
+                            <button class="btn-primary large" onclick="nextStep(3)">Continue to Photos <i class="ph ph-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Photos (Hidden initially) -->
+                <div class="upload-step" id="step-3" style="display: none;">
+                    <div class="card p-5">
+                        <h3 class="mb-2">Vehicle Photos</h3>
+                        <p class="subtitle mb-4">Clear photos attract more genuine buyers.</p>
+                        
+                        <div class="photo-requirements row gap-4 mb-4">
+                            <div class="req-item card bg-light flex-1"><i class="ph ph-check-circle green"></i> Minimum 10 Photos</div>
+                            <div class="req-item card bg-light flex-1"><i class="ph ph-star yellow"></i> Recommended 15+</div>
+                        </div>
+
+                        <div class="required-images-list mb-4">
+                            <strong>Required Angles:</strong>
+                            <div class="chips-container mt-2">
+                                <span class="chip">Front</span>
+                                <span class="chip">Rear</span>
+                                <span class="chip">Left</span>
+                                <span class="chip">Right</span>
+                                <span class="chip">Dashboard</span>
+                                <span class="chip">Odometer</span>
+                                <span class="chip">Engine</span>
+                                <span class="chip">Tyres</span>
+                                <span class="chip">Interior</span>
+                                <span class="chip">Boot</span>
+                            </div>
+                        </div>
+
+                        <div class="photo-grid-upload mt-4">
+                            <div class="upload-zone main-upload p-5">
+                                <i class="ph ph-image large-icon"></i>
+                                <span class="mt-2">Drag & Drop photos here</span>
+                                <button class="btn-secondary small mt-3">Browse Files</button>
+                            </div>
+                        </div>
+
+                        <div class="ai-quality-indicator card bg-light mt-4">
+                            <div class="flex-between mb-2">
+                                <span>AI Quality Check</span>
+                                <strong class="text-green">Good (8/10 required angles found)</strong>
+                            </div>
+                            <div class="progress-bar"><div class="progress" style="width: 80%;"></div></div>
+                            <div class="warnings-list mt-3">
+                                <p class="text-yellow small"><i class="ph ph-warning"></i> Blur detected in 1 photo. Consider re-uploading.</p>
+                                <p class="text-green small"><i class="ph ph-check"></i> No RC visible in images.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-actions mt-5 flex-between">
+                            <button class="btn-secondary large" onclick="nextStep(2)"><i class="ph ph-arrow-left"></i> Back</button>
+                            <button class="btn-primary large" onclick="nextStep(4)">Review Listing <i class="ph ph-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review (Hidden initially) -->
+                <div class="upload-step" id="step-4" style="display: none;">
+                    <div class="card p-5">
+                        <h3 class="mb-4">Review Listing</h3>
+                        
+                        <div class="preview-card mt-4 row gap-4 align-center">
+                            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800" alt="Preview" class="preview-img flex-1 border-radius">
+                            <div class="preview-info flex-1">
+                                <h2>Hyundai Creta SX Opt</h2>
+                                <div class="price-large text-primary mt-2">₹ 14,50,000</div>
+                                <p class="mt-2">2021 • 24,000 km • Petrol • Automatic</p>
+                                <p class="mt-3 text-muted">"Single-hand driven family car in pristine condition..."</p>
+                            </div>
+                        </div>
+
+                        <div class="verification-status-banner card bg-light mt-4 row align-center gap-3">
+                            <i class="ph ph-hourglass-high large-icon text-blue"></i>
+                            <div>
+                                <strong>Pending Verification</strong>
+                                <p>Our team will verify your RC and details before publishing.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-actions mt-5 flex-between">
+                            <button class="btn-secondary large" onclick="nextStep(3)"><i class="ph ph-pencil-simple"></i> Edit Details</button>
+                            <button class="btn-primary large" onclick="showUploadSuccess()"><i class="ph ph-paper-plane-tilt"></i> Submit Listing</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success Screen -->
+                <div class="upload-step text-center py-5 card" id="step-success" style="display: none;">
+                    <div class="success-icon mb-4"><i class="ph ph-check-circle text-green" style="font-size: 80px;"></i></div>
+                    <h2 class="mb-2">Congratulations!</h2>
+                    <p class="subtitle mb-4">Your vehicle has been submitted for verification.</p>
+                    
+                    <div class="card bg-light inline-block text-left mb-5">
+                        <p class="mb-2"><strong>Estimated review time:</strong> 30–60 minutes</p>
+                        <p><strong>Status:</strong> <span class="badge pending ml-2">Under Verification</span></p>
+                    </div>
+
+                    <div class="step-actions justify-center gap-3">
+                        <button class="btn-secondary large" onclick="navigateTo('home-screen')">Browse Cars</button>
+                        <button class="btn-primary large" onclick="navigateTo('listings-screen')">View My Listings</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 8B: Bike Listing Guidelines -->
+        <section id="bike-listing-guidelines-screen" class="screen bg-light">
+            <div class="container-standard py-5" style="max-width: 780px;">
+                <div style="margin-bottom: 1.5rem;">
+                    <button class="btn-secondary" onclick="goBackFromGuidelines()" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 1.2rem;border-radius:9999px;font-weight:700;height:38px;">
+                        <i class="ph ph-arrow-left"></i> Back
+                    </button>
+                </div>
+
+                <div style="text-align:center;margin-bottom:1.5rem;">
+                    <span class="guidelines-tagline-badge">
+                        <i class="ph ph-shield-check"></i>&nbsp; Only Genuine Owners. No Dealer Spam.
+                    </span>
+                </div>
+
+                <div style="text-align:center;margin-bottom:2rem;">
+                    <h2 style="font-size:1.65rem;margin-bottom:0.5rem;">FamilyCar Bike Listing Guidelines</h2>
+                    <p style="color:var(--text-muted);font-size:0.95rem;max-width:520px;margin:0 auto;line-height:1.6;">
+                        Please read these important rules before listing your bike. They help keep FamilyCar a trusted, spam-free marketplace.
+                    </p>
+                </div>
+
+                <div class="guidelines-card">
+                    <ol class="guidelines-list">
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-calendar-blank"></i></div>
+                            <div>
+                                <strong>Up to 2 Two-Wheelers Every 6 Months</strong>
+                                <p>One user can list up to <em>two two-wheelers within a 6-month period</em>.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-user-check"></i></div>
+                            <div>
+                                <strong>Only Your Own Bike</strong>
+                                <p>You can list only a two-wheeler <em>owned by you or your immediate family member</em>. Ownership verification may be required.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-file-text"></i></div>
+                            <div>
+                                <strong>RC Upload is Mandatory</strong>
+                                <p>A valid <em>Registration Certificate (RC)</em> must be uploaded to verify the bike.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-hash"></i></div>
+                            <div>
+                                <strong>Vehicle Number is Mandatory</strong>
+                                <p>You must provide the correct registration number. It will be used to identify and verify the vehicle.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-storefront"></i></div>
+                            <div>
+                                <strong>No Dealers or Commercial Sellers</strong>
+                                <p>FamilyCar is designed for <em>genuine individual owners</em>. Dealers, brokers, and commercial resellers are not allowed to list vehicles.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-camera"></i></div>
+                            <div>
+                                <strong>Upload Real and Recent Photos</strong>
+                                <p>Upload clear, recent photos of the <em>actual bike being sold</em>. Images downloaded from the internet are not allowed.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-check-square"></i></div>
+                            <div>
+                                <strong>Provide Accurate Information</strong>
+                                <p>Mileage, ownership, model, year, condition, and asking price should be accurate. Misleading information may result in listing removal.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="guideline-icon"><i class="ph ph-magnifying-glass"></i></div>
+                            <div>
+                                <strong>Listings Are Subject to Verification</strong>
+                                <p>Submitting a listing does <em>not guarantee immediate publication</em>. FamilyCar may verify the vehicle, documents, and seller before making it live.</p>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="guidelines-cta-box">
+                    <div class="guidelines-trust-msg">
+                        <i class="ph ph-hand-heart"></i>
+                        <div>
+                            <strong>FamilyCar is for genuine owners, not dealers.</strong>
+                            <p>By continuing, you confirm that the bike information provided by you is genuine and that you understand FamilyCar's listing rules.</p>
+                        </div>
+                    </div>
+
+                    <label class="guidelines-checkbox-label" id="bike-guidelines-agree-label">
+                        <input type="checkbox" id="bike-guidelines-agree-checkbox" onchange="toggleBikeGuidelinesBtn()">
+                        <span class="guidelines-checkbox-box"><i class="ph ph-check"></i></span>
+                        <span>I have read and agree to the FamilyCar Vehicle Listing Guidelines.</span>
+                    </label>
+
+                    <button id="bike-guidelines-continue-btn" class="guidelines-continue-btn" disabled onclick="navigateTo('bike-upload-screen')">
+                        <i class="ph ph-motorcycle"></i> Continue to List My Bike
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 8C: Upload Bike -->
+        <section id="bike-upload-screen" class="screen bg-light">
+            <div class="upload-container container-small py-5">
+                <div class="upload-header text-center mb-5">
+                    <h2>Sell Your Bike</h2>
+                    <p class="subtitle">List directly to thousands of genuine buyers.</p>
+                </div>
+
+                <!-- Progress Stepper -->
+                <div class="stepper mb-5">
+                    <div class="step active" id="bstep-1-indicator">
+                        <div class="step-circle"><i class="ph ph-identification-badge"></i></div>
+                        <span>Verification</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="bstep-2-indicator">
+                        <div class="step-circle"><i class="ph ph-list-dashes"></i></div>
+                        <span>Details</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="bstep-3-indicator">
+                        <div class="step-circle"><i class="ph ph-camera"></i></div>
+                        <span>Photos</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="bstep-4-indicator">
+                        <div class="step-circle"><i class="ph ph-check-circle"></i></div>
+                        <span>Review</span>
+                    </div>
+                </div>
+
+                <!-- Step 1: Verification -->
+                <div class="upload-step active" id="bstep-1">
+                    <div class="card p-5">
+                        <h3 class="mb-2">Bike Verification</h3>
+                        <p class="subtitle mb-4">We need your RC to verify ownership.</p>
+
+                        <div class="form-group">
+                            <label>Vehicle Number *</label>
+                            <input type="text" placeholder="e.g. MH 12 AB 1234" class="uppercase-input" required>
+                        </div>
+
+                        <div class="upload-zones row gap-4 mt-4">
+                            <div class="upload-zone flex-1">
+                                <i class="ph ph-file-text large-icon"></i>
+                                <strong>Upload RC Front *</strong>
+                                <small>JPG, PNG or PDF</small>
+                            </div>
+                            <div class="upload-zone flex-1">
+                                <i class="ph ph-file-text large-icon"></i>
+                                <strong>Upload RC Back *</strong>
+                                <small>JPG, PNG or PDF</small>
+                            </div>
+                        </div>
+
+                        <label class="checkbox-label mt-4">
+                            <input type="checkbox" required> I confirm I am the legal owner of this bike.
+                        </label>
+
+                        <div class="alert alert-warning mt-4">
+                            <i class="ph ph-warning"></i>
+                            <div>
+                                <strong>Warning</strong>
+                                <p>Uploading someone else's vehicle or providing false information will result in permanent account suspension.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-actions mt-5 flex-end">
+                            <button class="btn-primary large" onclick="nextStep(2, 'bike-upload-screen', 'bstep')">Continue to Details <i class="ph ph-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Details -->
+                <div class="upload-step" id="bstep-2" style="display: none;">
+                    <div class="card p-5">
+                        <h3 class="mb-4">Bike Information</h3>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Brand</label>
+                                <select><option>Select Brand</option><option>Hero</option><option>Honda</option><option>Bajaj</option><option>TVS</option><option>Royal Enfield</option><option>Yamaha</option><option>KTM</option><option>Suzuki</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Model</label>
+                                <select><option>Select Model</option><option>Classic 350</option><option>Pulsar NS200</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Variant</label>
+                                <input type="text" placeholder="e.g. Dual Channel ABS">
+                            </div>
+                            <div class="form-group">
+                                <label>Registration Year</label>
+                                <select><option>2023</option><option>2022</option><option>2021</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Engine (CC)</label>
+                                <input type="number" placeholder="e.g. 349">
+                            </div>
+                            <div class="form-group">
+                                <label>Fuel Type</label>
+                                <select><option>Petrol</option><option>Electric</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Bike Type *</label>
+                                <select id="bike-upload-type" required>
+                                    <option value="">Select Bike Type</option>
+                                    <option value="Commuter">Commuter</option>
+                                    <option value="Sports">Sports</option>
+                                    <option value="Cruiser">Cruiser</option>
+                                    <option value="Scooter">Scooter</option>
+                                    <option value="Adventure">Adventure</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Kilometers Driven</label>
+                                <input type="number" placeholder="e.g. 18000">
+                            </div>
+                            <div class="form-group">
+                                <label>Mileage (kmpl)</label>
+                                <input type="number" placeholder="e.g. 40">
+                            </div>
+                            <div class="form-group">
+                                <label>Color</label>
+                                <input type="text" placeholder="e.g. Black">
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Owners</label>
+                                <select><option>1st</option><option>2nd</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Expected Price (₹)</label>
+                                <input type="number" placeholder="e.g. 165000">
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <label>Reason for Selling</label>
+                            <input type="text" placeholder="e.g. Upgrading to a car">
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <label>Description</label>
+                            <textarea rows="4" placeholder="Describe the condition of your bike, service history, etc."></textarea>
+                        </div>
+
+                        <div class="step-actions mt-5 flex-between">
+                            <button class="btn-secondary large" onclick="nextStep(1, 'bike-upload-screen', 'bstep')"><i class="ph ph-arrow-left"></i> Back</button>
+                            <button class="btn-primary large" onclick="nextStep(3, 'bike-upload-screen', 'bstep')">Continue to Photos <i class="ph ph-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Photos -->
+                <div class="upload-step" id="bstep-3" style="display: none;">
+                    <div class="card p-5">
+                        <h3 class="mb-2">Bike Photos</h3>
+                        <p class="subtitle mb-4">Clear photos attract more genuine buyers.</p>
+
+                        <div class="photo-requirements row gap-4 mb-4">
+                            <div class="req-item card bg-light flex-1"><i class="ph ph-check-circle green"></i> Minimum 6 Photos</div>
+                            <div class="req-item card bg-light flex-1"><i class="ph ph-star yellow"></i> Recommended 10+</div>
+                        </div>
+
+                        <div class="required-images-list mb-4">
+                            <strong>Required Angles:</strong>
+                            <div class="chips-container mt-2">
+                                <span class="chip">Front</span>
+                                <span class="chip">Rear</span>
+                                <span class="chip">Left</span>
+                                <span class="chip">Right</span>
+                                <span class="chip">Odometer</span>
+                                <span class="chip">Engine</span>
+                                <span class="chip">Tyres</span>
+                            </div>
+                        </div>
+
+                        <div class="photo-grid-upload mt-4">
+                            <div class="upload-zone main-upload p-5">
+                                <i class="ph ph-image large-icon"></i>
+                                <span class="mt-2">Drag & Drop photos here</span>
+                                <button class="btn-secondary small mt-3">Browse Files</button>
+                            </div>
+                        </div>
+
+                        <div class="ai-quality-indicator card bg-light mt-4">
+                            <div class="flex-between mb-2">
+                                <span>AI Quality Check</span>
+                                <strong class="text-green">Good (5/7 required angles found)</strong>
+                            </div>
+                            <div class="progress-bar"><div class="progress" style="width: 72%;"></div></div>
+                            <div class="warnings-list mt-3">
+                                <p class="text-green small"><i class="ph ph-check"></i> No RC visible in images.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-actions mt-5 flex-between">
+                            <button class="btn-secondary large" onclick="nextStep(2, 'bike-upload-screen', 'bstep')"><i class="ph ph-arrow-left"></i> Back</button>
+                            <button class="btn-primary large" onclick="nextStep(4, 'bike-upload-screen', 'bstep')">Review Listing <i class="ph ph-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review -->
+                <div class="upload-step" id="bstep-4" style="display: none;">
+                    <div class="card p-5">
+                        <h3 class="mb-4">Review Listing</h3>
+
+                        <div class="preview-card mt-4 row gap-4 align-center">
+                            <img src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=800" alt="Preview" class="preview-img flex-1 border-radius">
+                            <div class="preview-info flex-1">
+                                <h2>Royal Enfield Classic 350</h2>
+                                <div class="price-large text-primary mt-2">₹ 1.65 Lakh</div>
+                                <p class="mt-2">2021 • 18,000 km • 349 cc • Petrol</p>
+                                <p class="mt-3 text-muted">"Well-maintained, single-owner bike in pristine condition..."</p>
+                            </div>
+                        </div>
+
+                        <div class="verification-status-banner card bg-light mt-4 row align-center gap-3">
+                            <i class="ph ph-hourglass-high large-icon text-blue"></i>
+                            <div>
+                                <strong>Pending Verification</strong>
+                                <p>Our team will verify your RC and details before publishing.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-actions mt-5 flex-between">
+                            <button class="btn-secondary large" onclick="nextStep(3, 'bike-upload-screen', 'bstep')"><i class="ph ph-pencil-simple"></i> Edit Details</button>
+                            <button class="btn-primary large" onclick="showUploadSuccess('bike-upload-screen', 'bstep')"><i class="ph ph-paper-plane-tilt"></i> Submit Listing</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success Screen -->
+                <div class="upload-step text-center py-5 card" id="bstep-success" style="display: none;">
+                    <div class="success-icon mb-4"><i class="ph ph-check-circle text-green" style="font-size: 80px;"></i></div>
+                    <h2 class="mb-2">Congratulations!</h2>
+                    <p class="subtitle mb-4">Your bike has been submitted for verification.</p>
+
+                    <div class="card bg-light inline-block text-left mb-5">
+                        <p class="mb-2"><strong>Estimated review time:</strong> 30–60 minutes</p>
+                        <p><strong>Status:</strong> <span class="badge pending ml-2">Under Verification</span></p>
+                    </div>
+
+                    <div class="step-actions justify-center gap-3">
+                        <button class="btn-secondary large" onclick="navigateTo('home-screen')">Browse Bikes</button>
+                        <button class="btn-primary large" onclick="navigateTo('listings-screen')">View My Listings</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 9: My Listings -->
+        <section id="listings-screen" class="screen bg-light">
+            <div class="container-standard py-3" style="max-width: 960px;">
+                <!-- Top Nav -->
+                <div style="margin-top: 1rem; margin-bottom: 1.5rem;">
+                    <button class="btn-secondary" onclick="navigateTo('home-screen')" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; border-radius: 9999px; font-weight: 700; height: 38px;">
+                        <i class="ph ph-arrow-left"></i> Back to Home
+                    </button>
+                </div>
+
+                <!-- Page Title Row -->
+                <div class="flex-between mb-4" style="align-items: center;">
+                    <div>
+                        <h2 style="margin-bottom: 0.25rem;">My Listings</h2>
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">Manage and track all your car listings</p>
+                    </div>
+                </div>
+
+                <!-- List Your Car CTA Banner -->
+                <div class="list-car-cta-banner" onclick="navigateTo('listing-guidelines-screen')">
+                    <div class="list-car-cta-icon">
+                        <i class="ph ph-car-simple"></i>
+                    </div>
+                    <div class="list-car-cta-text">
+                        <h3>Ready to sell your car?</h3>
+                        <p>List it on FamilyCar and reach thousands of verified buyers near you</p>
+                    </div>
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        <button class="list-car-cta-btn" onclick="event.stopPropagation(); navigateTo('listing-guidelines-screen')">
+                            <i class="ph ph-car-simple"></i> List Your Car
+                        </button>
+                        <button class="list-car-cta-btn" onclick="event.stopPropagation(); navigateTo('bike-listing-guidelines-screen')">
+                            <i class="ph ph-motorcycle"></i> List Your Bike
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section header -->
+                <div style="margin-bottom: 1rem; margin-top: 2rem;">
+                    <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-secondary);">Your Listed Cars <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">(1 listing)</span></h4>
+                </div>
+
+                <!-- Vertical Listing Cards -->
+                <div class="my-listings-vertical">
+
+                    <!-- Honda City ZX CVT — RC Verified -->
+                    <div class="listing-card-vertical" id="my-honda-city-card">
+                        <div class="listing-card-v-img">
+                            <img src="./Honda city (My listed car).webp" alt="Honda City ZX CVT">
+                            <span class="status-pill live" id="my-car-status-badge"><i class="ph ph-shield-check"></i> RC Verified</span>
+                        </div>
+                        <div class="listing-card-v-body">
+                            <div class="listing-card-v-info">
+                                <div>
+                                    <h3>Honda City ZX CVT <span class="badge-owner-verified" style="font-size:0.75rem; margin-left:0.4rem;"><i class="ph ph-shield-check"></i> Owner Verified</span></h3>
+                                    <div class="listing-card-v-meta">
+                                        <span><i class="ph ph-calendar"></i> 2022</span>
+                                        <span><i class="ph ph-gauge"></i> 28,500 km</span>
+                                        <span><i class="ph ph-gas-pump"></i> Petrol</span>
+                                        <span><i class="ph ph-arrows-left-right"></i> Automatic</span>
+                                        <span><i class="ph ph-map-pin"></i> Pune</span>
+                                    </div>
+                                </div>
+                                <div class="listing-card-v-price">
+                                    <div class="price-main">₹ 11,20,000</div>
+                                    <div class="price-label">Listed Price</div>
+                                </div>
+                            </div>
+                            <div class="listing-card-v-stats" style="margin-top:0.5rem; margin-bottom:0.75rem;">
+                                <div class="stat-pill"><i class="ph ph-eye"></i> 218 Views</div>
+                                <div class="stat-pill"><i class="ph ph-heart"></i> 9 Interested</div>
+                                <div class="stat-pill accent"><i class="ph ph-currency-inr"></i> 2 Offers</div>
+                            </div>
+                            <div class="listing-card-v-actions">
+                                <button class="btn-v-action primary" onclick="openMyCarViewModal()"><i class="ph ph-eye"></i> View Car & Photos</button>
+                                <button class="btn-v-action secondary" onclick="openMyCarEditModal()"><i class="ph ph-pencil-simple"></i> Edit Listing</button>
+                                <button class="btn-v-action secondary" onclick="navigateTo('messages-screen')"><i class="ph ph-chat-circle"></i> Messages</button>
+                                <button class="btn-v-action success" id="mark-sold-btn" onclick="markMyCarAsSold()"><i class="ph ph-check-circle"></i> Mark as Sold</button>
+                                <button class="btn-v-action danger" onclick="showToast('Listing deleted', 'info')"><i class="ph ph-trash"></i> Delete</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW MY CAR MODAL -->
+        <div class="modal-overlay" id="my-car-view-modal">
+            <div class="modal-card" style="max-width: 750px; width: 90%;">
+                <div class="modal-header">
+                    <h3><i class="ph ph-car"></i> Honda City ZX CVT (My Listing)</h3>
+                    <button class="btn-icon" onclick="closeMyCarViewModal()"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                    <!-- Verification banner -->
+                    <div class="rc-locked-banner">
+                        <i class="ph ph-shield-check"></i>
+                        <div>
+                            <strong>RC Verification Completed</strong>
+                            <p style="font-size:0.78rem; margin:0;">Registration No. MH 04 GZ 6708 verified with RTO database.</p>
+                        </div>
+                    </div>
+
+                    <!-- Main Image & 7 Photos Thumbnails Strip -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="position:relative;">
+                            <img id="my-car-gallery-main" src="./Honda city (My listed car).webp" style="width:100%; height:340px; object-fit:cover; border-radius:12px; border:1px solid #e2e8f0;">
+                            <span class="badge-owner-verified" style="position:absolute; top:12px; left:12px; background:rgba(16,185,129,0.95); color:#fff; padding:0.4rem 0.8rem; border-radius:999px; font-weight:700; font-size:0.8rem; backdrop-filter:blur(4px);">
+                                <i class="ph ph-shield-check"></i> RC Verified Vehicle
+                            </span>
+                        </div>
+                        <p style="font-size:0.8rem; color:#64748b; font-weight:600; margin-top:0.6rem; margin-bottom:0.3rem;">8 Verified Photos (Click to view):</p>
+                        <div style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:0.4rem;" class="my-car-thumbnails-container">
+                            <img src="./Honda city (My listed car).webp" onclick="changeMyCarMainImg(this)" class="my-car-thumb active" style="width:85px; height:62px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #1a1a1a; flex-shrink:0;">
+                            <img src="./honda city 2  (My listed car).jfif" onclick="changeMyCarMainImg(this)" class="my-car-thumb" style="width:85px; height:62px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; opacity:0.85; flex-shrink:0;" title="Side Angle">
+                            <img src="./honda city 3  (My listed car).jfif" onclick="changeMyCarMainImg(this)" class="my-car-thumb" style="width:85px; height:62px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; opacity:0.85; flex-shrink:0;" title="Rear View">
+                            <img src="./honda city 4 (My listed car).jfif" onclick="changeMyCarMainImg(this)" class="my-car-thumb" style="width:85px; height:62px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; opacity:0.85; flex-shrink:0;" title="Dashboard & Steering">
+                            <img src="./honda city 5 (My listed car).jfif" onclick="changeMyCarMainImg(this)" class="my-car-thumb" style="width:85px; height:62px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; opacity:0.85; flex-shrink:0;" title="Front Grille">
+                            <img src="./honda city 6  (My listed car).jfif" onclick="changeMyCarMainImg(this)" class="my-car-thumb" style="width:85px; height:62px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; opacity:0.85; flex-shrink:0;" title="Interior Seating">
+                            <img src="./honda city 7  (My listed car).jfif" onclick="changeMyCarMainImg(this)" class="my-car-thumb" style="width:85px; height:62px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; opacity:0.85; flex-shrink:0;" title="Engine Bay">
+                            <img src="./honda city 8 (My listed car).jfif" onclick="changeMyCarMainImg(this)" class="my-car-thumb" style="width:85px; height:62px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid transparent; opacity:0.85; flex-shrink:0;" title="Boot Space">
+                        </div>
+                    </div>
+
+                    <!-- Details Spec Grid -->
+                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.75rem; background:#f8fafc; padding:1rem; border-radius:10px; margin-bottom:1.25rem;">
+                        <div><small style="color:#64748b;">Expected Price</small><br><strong style="font-size:1.1rem; color:#1e293b;" id="view-modal-price">₹ 11,20,000</strong></div>
+                        <div><small style="color:#64748b;">Year</small><br><strong>2022</strong></div>
+                        <div><small style="color:#64748b;">Kilometers</small><br><strong id="view-modal-km">28,500 km</strong></div>
+                        <div><small style="color:#64748b;">Fuel Type</small><br><strong>Petrol</strong></div>
+                        <div><small style="color:#64748b;">Transmission</small><br><strong>Automatic</strong></div>
+                        <div><small style="color:#64748b;">Location</small><br><strong id="view-modal-loc">Pune, Maharashtra</strong></div>
+                    </div>
+
+                    <div>
+                        <h4 style="margin-bottom:0.4rem;">Description</h4>
+                        <p id="view-modal-desc" style="color:#475569; font-size:0.9rem; line-height:1.5;">Single-hand driven Honda City ZX CVT in pristine condition. Full company service record available. Leather seats, sunroof, and new tyres.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeMyCarViewModal()">Close</button>
+                    <button class="btn-primary" onclick="closeMyCarViewModal(); openMyCarEditModal();"><i class="ph ph-pencil-simple"></i> Edit Listing</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- EDIT MY CAR MODAL -->
+        <div class="modal-overlay" id="my-car-edit-modal">
+            <div class="modal-card" style="max-width: 650px; width: 90%;">
+                <div class="modal-header">
+                    <h3><i class="ph ph-pencil-simple"></i> Edit Listing — Honda City ZX CVT</h3>
+                    <button class="btn-icon" onclick="closeMyCarEditModal()"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                    
+                    <!-- RC Locked Banner -->
+                    <div class="rc-locked-banner">
+                        <i class="ph ph-lock-key"></i>
+                        <div>
+                            <strong>RC Details & Photos Locked</strong>
+                            <p style="font-size:0.78rem; margin:0;">Vehicle Number (MH 04 GZ 6708) & RC Certificate photos cannot be changed after verification to maintain buyer trust.</p>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                        <div class="form-group">
+                            <label>Expected Price (₹)</label>
+                            <input type="number" id="edit-car-price" value="1120000" class="large-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Kilometers Driven</label>
+                            <input type="number" id="edit-car-km" value="28500">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                        <div class="form-group">
+                            <label>Location / City</label>
+                            <input type="text" id="edit-car-loc" value="Pune, Maharashtra">
+                        </div>
+                        <div class="form-group">
+                            <label>Reason for Selling</label>
+                            <input type="text" id="edit-car-reason" value="Upgrading to a 7-seater SUV">
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label>Description</label>
+                        <textarea id="edit-car-desc" rows="3">Single-hand driven Honda City ZX CVT in pristine condition. Full company service record available. Leather seats, sunroof, and new tyres.</textarea>
+                    </div>
+
+                    <!-- Locked RC Section preview -->
+                    <div class="rc-photo-disabled-zone mb-3">
+                        <small style="color:#64748b; font-weight:700; display:block; margin-bottom:0.3rem;">Uploaded Registration Certificate (RC)</small>
+                        <div style="display:flex; gap:0.5rem;">
+                            <img src="./Honda city (My listed car).webp" style="width:70px; height:50px; object-fit:cover; border-radius:6px; filter:grayscale(30%);">
+                            <div style="font-size:0.78rem; color:#475569;">
+                                <strong>RC Status: Verified ✓</strong><br>
+                                Registration No: MH 04 GZ 6708
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeMyCarEditModal()">Cancel</button>
+                    <button class="btn-primary" onclick="saveMyCarEdit()"><i class="ph ph-check"></i> Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- SCREEN 10: My Profile -->
+        <section id="profile-screen" class="screen bg-light">
+            <div class="container-standard py-3" style="max-width: 1200px;">
+                <div style="margin-top: 1rem; margin-bottom: 0;">
+                    <button class="btn-secondary" onclick="navigateTo('home-screen')" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.2rem; border-radius: 9999px; font-weight: 700; height: 38px;">
+                        <i class="ph ph-arrow-left"></i> Back to Home
+                    </button>
+                </div>
+            </div>
+            <div class="container-standard py-3">
+                <div class="profile-layout row gap-5">
+                    <!-- Profile Sidebar -->
+                    <div class="profile-sidebar card flex-1 h-fit">
+                        <div class="profile-header text-center">
+                            <div class="avatar-large mx-auto mb-3" style="position: relative; width: 120px; height: 120px; margin: 0 auto;">
+                                <img id="profile-avatar-img" src="https://ui-avatars.com/api/?name=Manish+Kumar&background=0D8ABC&color=fff&size=120" alt="Profile" class="round-img" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                                <label for="profile-photo-upload" class="avatar-upload-overlay" style="position: absolute; bottom: -4px; right: -4px; background: #4f46e5; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid #ffffff; transition: all 0.2s;">
+                                    <i class="ph ph-camera" style="font-size: 1.2rem;"></i>
+                                </label>
+                                <input type="file" id="profile-photo-upload" style="display: none;" onchange="handleProfilePhotoUpload(event)">
+                            </div>
+                            <h3>Manish Kumar</h3>
+                            <p class="member-since text-muted small mt-1">Member since 2024</p>
+                            <div class="verification-badges mt-3">
+                                <span class="badge verified"><i class="ph ph-shield-check"></i> Verified Profile</span>
+                            </div>
+                            <div class="trust-score-badge mt-4 card bg-light p-3">
+                                <span class="block small text-muted">Trust Score</span>
+                                <strong class="large-text text-primary">98/100</strong>
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                        <nav class="profile-nav flex-col gap-2">
+                            <a href="#" class="active p-2 border-radius bg-light fw-bold text-primary"><i class="ph ph-user"></i> Personal Information</a>
+                            <a href="#" onclick="navigateTo('listings-screen')" class="p-2 border-radius hover-bg"><i class="ph ph-car"></i> My Listings</a>
+                            <a href="#" class="p-2 border-radius hover-bg"><i class="ph ph-heart"></i> Saved Cars</a>
+                            <a href="#" class="p-2 border-radius hover-bg"><i class="ph ph-handshake"></i> Offers Made</a>
+                            <a href="#" class="p-2 border-radius hover-bg"><i class="ph ph-gear"></i> Settings</a>
+                            <a href="#" class="text-red mt-4 p-2 hover-bg border-radius" onclick="event.preventDefault(); logout();"><i class="ph ph-sign-out"></i> Logout</a>
+                        </nav>
+                    </div>
+
+                    <!-- Profile Content -->
+                    <div class="profile-content card flex-3">
+                        <h3 class="mb-4">Personal Information</h3>
+                        <form class="mt-4">
+                            <div class="form-row row gap-4 mb-4">
+                                <div class="form-group flex-1">
+                                    <label>Full Name</label>
+                                    <input type="text" value="Manish Kumar" readonly class="bg-light">
+                                    <small class="text-muted">Name must match Aadhaar/RC</small>
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label>Mobile Number</label>
+                                    <div class="input-with-button flex-between align-center bg-light border-radius p-1 pr-3">
+                                        <input type="text" value="+91 98765 43210" readonly class="bg-light border-none m-0">
+                                        <span class="badge verified"><i class="ph ph-check"></i> Verified</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label>Email Address</label>
+                                <input type="email" value="manish.k@example.com">
+                            </div>
+                            <div class="form-group mb-4">
+                                <label>Address</label>
+                                <textarea rows="3">Andheri West, Mumbai, Maharashtra 400053</textarea>
+                            </div>
+                            <button type="button" class="btn-primary mt-3">Save Changes</button>
+                        </form>
+
+                        <hr class="my-5">
+
+                        <h3 class="mb-4">Verification Documents</h3>
+                        <div class="documents-list mt-3">
+                            <div class="doc-item card bg-light mb-4 row align-center gap-3">
+                                <i class="ph ph-identification-card large-icon text-primary"></i>
+                                <div>
+                                    <strong>Identity Proof (Aadhaar/PAN)</strong>
+                                    <p class="text-green small mt-1"><i class="ph ph-check"></i> Verified successfully</p>
+                                </div>
+                            </div>
+                            <div class="alert alert-warning mt-3 row align-start gap-3 p-4 border-radius">
+                                <i class="ph ph-warning large-icon text-yellow"></i>
+                                <div>
+                                    <strong class="mb-1 block">Listing Limit Notice</strong>
+                                    <p class="small">To maintain a marketplace for genuine individual owners, each account can list only one car (or up to two two-wheelers) within a 6-month period unless approved by our verification team.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Mobile Login Modal -->
+    <div id="mobile-login-modal" class="custom-modal-overlay">
+        <div class="custom-modal-card">
+            <button class="modal-close-btn" onclick="closeMobileLoginModal()">&times;</button>
+            <h3>Log in with Mobile</h3>
+            <p class="modal-subtitle">We will send a 4-digit OTP to verify your number</p>
+            
+            <!-- Step 1: Enter Mobile -->
+            <div id="otp-step-1" class="otp-step active">
+                <div class="form-group-custom">
+                    <i class="ph ph-device-mobile input-icon"></i>
+                    <input type="tel" id="mobile-input-field" placeholder="Mobile Number (+91)" required>
+                </div>
+                <button onclick="sendOTPFlow()" class="btn-submit-pill mt-3">Send OTP</button>
+            </div>
+            
+            <!-- Step 2: Enter OTP -->
+            <div id="otp-step-2" class="otp-step">
+                <div class="form-group-custom">
+                    <i class="ph ph-shield-check input-icon"></i>
+                    <input type="text" id="otp-input-field" placeholder="Enter 4-Digit OTP" maxlength="4" required>
+                </div>
+                <button onclick="verifyOTPFlow()" class="btn-submit-pill mt-3">Verify & Log In</button>
+                <p class="resend-text">Didn't receive code? <a href="#" onclick="sendOTPFlow()">Resend OTP</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Completion Modal -->
+    <div id="profile-completion-modal" class="custom-modal-overlay">
+        <div class="custom-modal-card" style="max-width: 500px; text-align: left;">
+            <button class="modal-close-btn" onclick="closeProfileCompletionModal()">&times;</button>
+            <h3 style="text-align: center; margin-bottom: 1.5rem; margin-top: 0; font-size: 1.4rem; color: #1e293b;">Complete Your Profile</h3>
+            
+            <form id="profile-completion-form" onsubmit="event.preventDefault(); handleProfileCompletionSubmit();" class="auth-form" style="gap: 1.25rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">Address</label>
+                    <div class="form-group-custom">
+                        <i class="ph ph-map-pin input-icon"></i>
+                        <input type="text" id="pc-address" placeholder="Enter Full Address" required style="padding-left: 3.2rem;">
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">Aadhaar Card Number</label>
+                    <div class="form-group-custom">
+                        <i class="ph ph-identification-card input-icon"></i>
+                        <input type="text" id="pc-aadhaar" placeholder="Enter 12-digit Aadhaar" pattern="\d{12}" title="Please enter 12-digit Aadhaar number" required style="padding-left: 3.2rem;">
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">Driving License Number</label>
+                    <div class="form-group-custom">
+                        <i class="ph ph-cardholder input-icon"></i>
+                        <input type="text" id="pc-dl" placeholder="Enter DL Number" required style="padding-left: 3.2rem;">
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">Do you own a vehicle?</label>
+                    <div style="display: flex; gap: 2rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem; color: #334155;">
+                            <input type="checkbox" id="pc-own-car" style="width: 18px; height: 18px; cursor: pointer;"> Car
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem; color: #334155;">
+                            <input type="checkbox" id="pc-own-bike" style="width: 18px; height: 18px; cursor: pointer;"> Bike
+                        </label>
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">Do you want to buy or sell a vehicle?</label>
+                    <div style="display: flex; gap: 2rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem; color: #334155;">
+                            <input type="checkbox" id="pc-intent-buy" style="width: 18px; height: 18px; cursor: pointer;"> Buy
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.95rem; color: #334155;">
+                            <input type="checkbox" id="pc-intent-sell" style="width: 18px; height: 18px; cursor: pointer;"> Sell
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-submit-pill" style="margin-top: 0.5rem;">Save & Complete Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Generic Warning Toasts Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
